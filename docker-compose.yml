@@ -21,6 +21,17 @@ services:
     networks:
       - secrets-net
 
+  frontend:
+    build: ./frontend
+    container_name: secrets-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - orchestrator
+    networks:
+      - secrets-net
+
+
 networks:
   secrets-net:
     driver: bridge

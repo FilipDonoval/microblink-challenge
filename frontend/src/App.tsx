@@ -12,6 +12,7 @@ function App() {
         setIsLoading(true)
         await new Promise(resolve => setTimeout(resolve, 1000));
 
+
         try {
             const response = await fetch('/api/scan-repo', {
                 method: 'POST',
@@ -22,6 +23,18 @@ function App() {
                     repo_url: inputUrl
                 }),
             })
+
+            /*
+            const response = await fetch('/api/scan-local', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    path: '/repos/repo1'
+                }),
+            })
+            */
 
             if (!response.ok) {
                 throw new Error(`Server responded with ${response.status}`)
@@ -38,7 +51,7 @@ function App() {
     }
 
     return (
-        <Container sx={{ height: '100vh' }}>
+        <Container sx={{ height: '100vh', pt: 10 }}>
             <Stack spacing={4} alignItems='center' justifyContent='center'>
                 <Typography variant='h2' sx={{ textAlign: 'center' }}>Secrets Scanner</Typography>
                 <Typography variant='h5'>Enter the url of github repo you want to scan</Typography>
@@ -51,10 +64,51 @@ function App() {
                 </Box>
 
                 <div>
-                    {data ? (<pre>{JSON.stringify(data, null, 2)}</pre>) : (<p>No data yet</p>)}
+                    {data ? <ParsedData data={data}></ParsedData> : (<div>No data yet</div>)}
                 </div>
             </Stack>
         </Container>
+    )
+}
+
+function ParsedData({ data }: { data: any }) {
+
+    if (!data.all_results) {
+        return <div>{data}</div>
+    }
+
+
+    const secretResoults = data.all_results.filter((fileResoult: any) => fileResoult.has_secrets)
+
+    return (
+        <div>
+            {
+                secretResoults.length === 0 ? <div>No secrets found</div> :
+                    secretResoults.map((fileResult: any) => (
+                        <div key={fileResult.filename}>
+                            <p>{fileResult.has_secrets ? 'FOUND SECRETS' : 'No secrets found'}</p>
+                            <p>in file: {fileResult.filename}</p>
+                            {
+                                Object.entries(fileResult.detectors)
+                                    .filter(([_, details]: [string, any]) => !details.passed)
+                                    .map(([detectorName, details]: [string, any]) => (
+                                        <div key={fileResult.filename + detectorName} style={{ color: details.passed ? undefined : 'red' }}>
+
+
+                                            <div>Detector: {detectorName}</div>
+                                            <div><pre>Matches: {JSON.stringify(details.matches, null, 2)}</pre></div>
+                                            <div>Matches_count: {details.matches_count}</div>
+                                            <div>passed: {details.passed ? 1 : 0}</div>
+
+                                            <br></br>
+
+                                        </div>
+                                    ))
+                            }
+                        </div>
+                    ))
+            }
+        </div>
     )
 }
 

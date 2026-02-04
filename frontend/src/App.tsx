@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Box, Button, Container, Stack, TextField, Typography } from '@mui/material'
 import './App.css'
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         setIsLoading(true)
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         try {
             const response = await fetch('/api/scan-repo', {
@@ -36,36 +38,23 @@ function App() {
     }
 
     return (
-        <>
-            <form onSubmit={handleSubmit}>
-                <input style={{width: '50vw'}} type="text" value={inputUrl} disabled={isLoading} onChange={(e) => setInputUrl(e.target.value)}/>
+        <Container sx={{ height: '100vh' }}>
+            <Stack spacing={4} alignItems='center' justifyContent='center'>
+                <Typography variant='h2' sx={{ textAlign: 'center' }}>Secrets Scanner</Typography>
+                <Typography variant='h5'>Enter the url of github repo you want to scan</Typography>
 
-                <button type="submit" disabled={isLoading || !inputUrl}>
-                    {isLoading ? <div className="spinner"></div> : 'Submit'}
-                </button>
-            </form>
+                <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <TextField sx={{ width: { xs: '90%', sm: '60%', md: '40%' } }} label='URL' variant='outlined' value={inputUrl} disabled={isLoading} onChange={(e) => setInputUrl(e.target.value)}></TextField>
+                    <Button variant='contained' type="submit" loading={isLoading} disabled={!inputUrl}>
+                        Submit
+                    </Button>
+                </Box>
 
-            <div>
-                {data ? (<pre>{JSON.stringify(data, null, 2)}</pre>) : (<p>No data yet</p>)}
-            </div>
-<style>{`
-        .spinner {
-          width: 16px;
-          height: 16px;
-          border: 2px solid #ffffff;
-          border-top: 2px solid transparent;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          display: inline-block;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-
-        </>
+                <div>
+                    {data ? (<pre>{JSON.stringify(data, null, 2)}</pre>) : (<p>No data yet</p>)}
+                </div>
+            </Stack>
+        </Container>
     )
 }
 

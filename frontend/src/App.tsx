@@ -70,7 +70,7 @@ function App() {
                     {
                         privateRepo && <TextField sx={{ width: { xs: '90%', sm: '60%', md: '40%' } }} label='TOKEN' variant='outlined' value={token} disabled={isLoading} onChange={(e) => setToken(e.target.value)}></TextField>
                     }
-                    <Button variant='contained' type="submit" loading={isLoading} disabled={!inputUrl}>
+                    <Button variant='contained' type="submit" loading={isLoading} disabled={!inputUrl || (privateRepo && !token)}>
                         Submit
                     </Button>
                 </Box>

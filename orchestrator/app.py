@@ -10,6 +10,7 @@ from git import Repo
 app = Flask(__name__)
 
 SCANNER_URL = os.getenv('SCANNER_URL', 'http://scanner:8001')
+LLM_ANALYSIS_URL = os.getenv('LLM_ANALYSIS_URL', 'http://llm-analysis:8002')
 MAX_WORKERS = 10  # Parallel scanning workers
 
 def is_scannable_file(file_path: Path) -> bool:
@@ -115,9 +116,16 @@ def health():
     except:
         scanner_healthy = False
 
+    try:
+        response = requests.get(f'{LLM_ANALYSIS_URL}/health', timeout=5)
+        llm_analysis_healthy = response.status_code == 200
+    except:
+        llm_analysis_healthy = False
+
     return jsonify({
         "status": "healthy" if scanner_healthy else "degraded",
-        "scanner_status": "healthy" if scanner_healthy else "unhealthy"
+        "scanner_status": "healthy" if scanner_healthy else "unhealthy",
+        "llm_analysis_status": "healthy" if llm_analysis_healthy else "unhealthy"
     }), 200
 
 @app.route('/scan-repo', methods=['POST'])

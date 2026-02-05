@@ -7,6 +7,14 @@ services:
     networks:
       - secrets-net
 
+  llm-analysis:
+    build: ./llm-analysis
+    container_name: secrets-llm-analysis
+    ports:
+      - "8002:8002"
+    networks:
+      - secrets-net
+
   orchestrator:
     build: ./orchestrator
     container_name: secrets-orchestrator
@@ -14,10 +22,12 @@ services:
       - "8000:8000"
     environment:
       - SCANNER_URL=http://scanner:8001
+      - LLM_ANALYSIS_URL=http://llm-analysis:8002
     volumes:
       - ./test-repos:/repos:ro
     depends_on:
       - scanner
+      - llm-analysis
     networks:
       - secrets-net
 

@@ -48,6 +48,31 @@ def scan_file(args: tuple) -> dict:
             'error': str(e)
         }
 
+
+def llm_analysis(findings: list) -> dict:
+
+    try:
+        llm_response = requests.post(
+            f'{LLM_ANALYSIS_URL}/generate-analysis',
+            json={
+                'findings': findings
+            },
+            timeout=200
+        )
+
+        if llm_response.status_code == 200:
+            return llm_response.json()
+        else:
+            return {
+                'error': f'llm returned status {llm_response.status_code}'
+            }
+    except Exception as e:
+        return {
+            'error': str(e)
+        }
+
+
+
 def scan_local_path(local_path: str, scanner_url: str) -> dict:
     """Scan a local directory for secrets."""
     repo_path = Path(local_path)
@@ -160,6 +185,13 @@ def scan_repo():
 
     try:
         results = clone_and_scan_repo(repo_url, SCANNER_URL)
+
+        if not results.get('findings'):
+            results['llm_analysis'] = {"message": "No secrets found. Codebase appears clean."}
+        else:
+            results['llm_analysis'] = llm_analysis(results['findings'])
+
+
         return jsonify(results), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -183,6 +215,12 @@ def scan_local():
 
     try:
         results = scan_local_path(local_path, SCANNER_URL)
+
+        if not results.get('findings'):
+            results['llm_analysis'] = {"message": "No secrets found. Codebase appears clean."}
+        else:
+            results['llm_analysis'] = llm_analysis(results['findings'])
+
         return jsonify(results), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

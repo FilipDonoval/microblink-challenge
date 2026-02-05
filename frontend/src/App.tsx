@@ -92,11 +92,26 @@ function DisplayResponse({ data }: { data: any }) {
     return (
         <Box sx={{ width: '80%' }}>
             <Box>
-                <Typography>
-                    LLM analysis: {JSON.stringify(data.llm_analysis.message)}
+                <Typography variant='h4'>
+                    LLM analysis
+                </Typography>
+                <Typography variant='h6'>
+                    {JSON.stringify(data.llm_analysis.message)}
+                </Typography>
+                <Typography variant='h5'>
+                    Summary
                 </Typography>
                 <Typography>
-                    Summary: {JSON.stringify(data.summary)}
+                    {
+                        Object.entries(data.summary).map(([key, value]: [string, any]) => (
+                            <Typography>{key}: {value}</Typography>
+
+                        ))
+
+
+                        //JSON.stringify(data.summary)
+
+                    }
                 </Typography>
             </Box>
             <List>
@@ -111,6 +126,33 @@ function DisplayResponse({ data }: { data: any }) {
     )
 }
 
+
+function ResultRow({ finding }: { finding: any }) {
+    const [open, setOpen] = useState(false)
+
+    const handleClick = () => (
+        setOpen(!open)
+    )
+
+    const detectorEntries = Object.entries(finding.detectors)
+
+    return (
+        <>
+            <ListItemButton onClick={handleClick} divider>
+                <ListItemText primary={finding.filename.split('/').pop()} secondary={finding.filename}></ListItemText>
+            </ListItemButton>
+            <Collapse in={open} timeout='auto' unmountOnExit>
+                <List component='div' disablePadding sx={{ pl: 4 }}>
+                    {
+                        detectorEntries.map(([detectorName, details]: [string, any]) => (
+                            <DetectorMatchesList key={detectorName} detectorName={detectorName} details={details}></DetectorMatchesList>
+                        ))
+                    }
+                </List>
+            </Collapse>
+        </>
+    )
+}
 
 function DetectorMatchesList({ detectorName, details }: { detectorName: string, details: any }) {
     const [open, setOpen] = useState(false)
@@ -156,34 +198,6 @@ function DetectorMatchesList({ detectorName, details }: { detectorName: string, 
 
     )
 }
-
-function ResultRow({ finding }: { finding: any }) {
-    const [open, setOpen] = useState(false)
-
-    const handleClick = () => (
-        setOpen(!open)
-    )
-
-    const detectorEntries = Object.entries(finding.detectors)
-
-    return (
-        <>
-            <ListItemButton onClick={handleClick} divider>
-                <ListItemText primary={finding.filename.split('/').pop()} secondary={finding.filename}></ListItemText>
-            </ListItemButton>
-            <Collapse in={open} timeout='auto' unmountOnExit>
-                <List component='div' disablePadding sx={{ pl: 4 }}>
-                    {
-                        detectorEntries.map(([detectorName, details]: [string, any]) => (
-                            <DetectorMatchesList key={detectorName} detectorName={detectorName} details={details}></DetectorMatchesList>
-                        ))
-                    }
-                </List>
-            </Collapse>
-        </>
-    )
-}
-
 
 
 function RepoButton({ privateRepo, onChange }: { privateRepo: boolean, onChange: Function }) {

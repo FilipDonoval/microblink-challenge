@@ -145,7 +145,8 @@ def scan_repo():
     if 'token' in data:
         token = data['token']
         if token != "":
-            repo_url = repo_url.replace("https://", f"https://{token}@")
+            clean_url = repo_url.removeprefix("https://github.com/").removeprefix("git@github.com:")
+            repo_url = f"https://{token}@github.com/{clean_url}"
 
 
 

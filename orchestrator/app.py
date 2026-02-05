@@ -137,9 +137,17 @@ def scan_repo():
 
     repo_url = data['repo_url']
 
+
     # Validate URL
     if not repo_url.startswith(('https://github.com/', 'git@github.com:')):
         return jsonify({"error": "Only GitHub repositories are supported"}), 400
+
+    if 'token' in data:
+        token = data['token']
+        if token != "":
+            repo_url = repo_url.replace("https://", f"https://{token}@")
+
+
 
     try:
         results = clone_and_scan_repo(repo_url, SCANNER_URL)

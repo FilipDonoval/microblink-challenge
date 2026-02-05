@@ -6,6 +6,7 @@ function App() {
     const [data, setData] = useState<any>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [inputUrl, setInputUrl] = useState("")
+    const [token, setToken] = useState("")
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
@@ -20,7 +21,8 @@ function App() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    repo_url: inputUrl
+                    repo_url: inputUrl,
+                    token: token
                 }),
             })
 
@@ -58,6 +60,7 @@ function App() {
 
                 <Box component='form' onSubmit={handleSubmit} sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
                     <TextField sx={{ width: { xs: '90%', sm: '60%', md: '40%' } }} label='URL' variant='outlined' value={inputUrl} disabled={isLoading} onChange={(e) => setInputUrl(e.target.value)}></TextField>
+                    <TextField sx={{ width: { xs: '90%', sm: '60%', md: '40%' } }} label='TOKEN' variant='outlined' value={token} disabled={isLoading} onChange={(e) => setToken(e.target.value)}></TextField>
                     <Button variant='contained' type="submit" loading={isLoading} disabled={!inputUrl}>
                         Submit
                     </Button>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Button, Container, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
+import { Box, Button, Collapse, Container, List, ListItem, ListItemButton, ListItemText, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
 import './App.css'
 
 function App() {
@@ -12,8 +12,6 @@ function App() {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         setIsLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
 
         try {
             const response = await fetch('/api/scan-repo', {
@@ -76,13 +74,117 @@ function App() {
                 </Box>
 
 
-                <div>
-                    {data ? <ParsedData data={data}></ParsedData> : (<div>No data yet</div>)}
-                </div>
+                {data ? <DisplayResponse data={data}></DisplayResponse> : (<Box>No data yet</Box>)}
+
+
             </Stack>
         </Container>
     )
 }
+
+
+
+function DisplayResponse({ data }: { data: any }) {
+    if (!data.all_results) {
+        return <div>{data}</div>
+    }
+
+    return (
+        <Box sx={{ width: '80%' }}>
+            <Box>
+                <Typography>
+                    LLM analysis: {JSON.stringify(data.llm_analysis.message)}
+                </Typography>
+                <Typography>
+                    Summary: {JSON.stringify(data.summary)}
+                </Typography>
+            </Box>
+            <List>
+                {
+                    data.findings.map((finding: any, index: any) => (
+                        <ResultRow key={index} finding={finding}></ResultRow>
+                    ))
+
+                }
+            </List>
+        </Box>
+    )
+}
+
+
+function DetectorMatchesList({ detectorName, details }: { detectorName: string, details: any }) {
+    const [open, setOpen] = useState(false)
+
+    const handleClick = () => (
+        setOpen(!open)
+    )
+
+    return (
+
+        details.matches_count > 0 ?
+            <>
+                <ListItemButton onClick={handleClick} sx={{ color: 'error' }}>
+                    <ListItemText
+                        primary={`${detectorName}: ${details.passed ? 'Passed' : 'Failed'}`}
+                        secondary={`Matches: ${details.matches_count}`}
+                        sx={{ color: 'error.main' }} >
+                    </ListItemText>
+                </ListItemButton>
+                <Collapse in={open} timeout='auto' unmountOnExit>
+                    <List component='div' disablePadding sx={{ pl: 4 }}>
+                        {
+                            details.matches.map((match: any) => (
+                                <ListItemText key={match}
+                                    primary={match.string}
+                                    secondary={`Entropy: ${match.entropy}`}
+                                    sx={{ color: 'error.main' }} >
+                                </ListItemText>
+                            ))
+                        }
+                    </List>
+                </Collapse>
+            </>
+            :
+            <ListItem>
+                <ListItemText
+                    primary={`${detectorName}: ${details.passed ? 'Passed' : 'Failed'}`}
+                    secondary={details.matches_count > 0 ? `Matches found: ${details.matches_count}` : null}
+                    sx={{ color: details.matches_count > 0 ? 'red' : undefined }}
+                >
+                </ListItemText>
+            </ListItem>
+
+    )
+}
+
+function ResultRow({ finding }: { finding: any }) {
+    const [open, setOpen] = useState(false)
+
+    const handleClick = () => (
+        setOpen(!open)
+    )
+
+    const detectorEntries = Object.entries(finding.detectors)
+
+    return (
+        <>
+            <ListItemButton onClick={handleClick} divider>
+                <ListItemText primary={finding.filename.split('/').pop()} secondary={finding.filename}></ListItemText>
+            </ListItemButton>
+            <Collapse in={open} timeout='auto' unmountOnExit>
+                <List component='div' disablePadding sx={{ pl: 4 }}>
+                    {
+                        detectorEntries.map(([detectorName, details]: [string, any]) => (
+                            <DetectorMatchesList key={detectorName} detectorName={detectorName} details={details}></DetectorMatchesList>
+                        ))
+                    }
+                </List>
+            </Collapse>
+        </>
+    )
+}
+
+
 
 function RepoButton({ privateRepo, onChange }: { privateRepo: boolean, onChange: Function }) {
 
@@ -104,46 +206,6 @@ function RepoButton({ privateRepo, onChange }: { privateRepo: boolean, onChange:
     )
 }
 
-function ParsedData({ data }: { data: any }) {
-
-    if (!data.all_results) {
-        return <div>{data}</div>
-    }
-
-
-    const secretResoults = data.all_results.filter((fileResoult: any) => fileResoult.has_secrets)
-
-    return (
-        <div>
-            {
-                secretResoults.length === 0 ? <div>No secrets found</div> :
-                    secretResoults.map((fileResult: any) => (
-                        <div key={fileResult.filename}>
-                            <p>{fileResult.has_secrets ? 'FOUND SECRETS' : 'No secrets found'}</p>
-                            <p>in file: {fileResult.filename}</p>
-                            {
-                                Object.entries(fileResult.detectors)
-                                    .filter(([_, details]: [string, any]) => !details.passed)
-                                    .map(([detectorName, details]: [string, any]) => (
-                                        <div key={fileResult.filename + detectorName} style={{ color: details.passed ? undefined : 'red' }}>
-
-
-                                            <div>Detector: {detectorName}</div>
-                                            <div><pre>Matches: {JSON.stringify(details.matches, null, 2)}</pre></div>
-                                            <div>Matches_count: {details.matches_count}</div>
-                                            <div>passed: {details.passed ? 1 : 0}</div>
-
-                                            <br></br>
-
-                                        </div>
-                                    ))
-                            }
-                        </div>
-                    ))
-            }
-        </div>
-    )
-}
 
 export default App
 

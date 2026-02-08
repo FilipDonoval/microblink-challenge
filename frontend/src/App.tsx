@@ -1,10 +1,8 @@
 import { Box, Button, Container, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
-import './App.css'
 import { DisplayAll, DisplayFindings } from './components/DisplayResponse'
 import { RepoTypeSelector } from './components/RepoTypeSelector'
 import { useRepoScanner } from './hooks/useRepoScanner'
-
 
 function App() {
     const [inputUrl, setInputUrl] = useState("")

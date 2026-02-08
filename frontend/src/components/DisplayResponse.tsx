@@ -15,7 +15,7 @@ export const DisplayFindings = ({ data }: { data: ScanResponse }) => {
                 <Typography variant='h4'>
                     LLM analysis
                 </Typography>
-                <Typography variant='h6' sx={{ pl: 2, width: { xs: '100%', sm: '80%', md: '60%' } }}>
+                <Typography gutterBottom sx={{ pl: 2 }}>
                     {
                         data.llm_analysis.message ?
                             data.llm_analysis.message

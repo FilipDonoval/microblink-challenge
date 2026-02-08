@@ -16,6 +16,12 @@ def llm_response(data):
         contents=str(data),
         config=types.GenerateContentConfig(
             system_instruction="""
+                Formatting rules:
+                - Return PURE PLAIN TEXT only.
+                - Do NOT use Markdown (no bolding, no asterisks, no hash signs).
+                - Do NOT use bullet points or numbered lists; use full sentences.
+                - Do NOT add line breaks for wrapping; allow text to flow naturally.
+
                 You are a senior AppSec  Engineer. 
                 Provide a conciese, professional security report. 
                 Your are given the findings of secret types found in the codebase, 

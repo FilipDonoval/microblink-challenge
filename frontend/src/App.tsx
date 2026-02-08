@@ -59,12 +59,12 @@ function App() {
 
 
 
-                {data ?
+                {data &&
                     <>
                         <DisplayAll data={data} ></DisplayAll>
                         <Box sx={{ height: '20vh' }}></Box>
                     </>
-                    : <Typography>{responseError}</Typography>}
+                }
 
             </Stack>
         </Container>

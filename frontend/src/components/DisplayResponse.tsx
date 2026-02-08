@@ -1,10 +1,11 @@
-import { Box, Collapse, List, ListItem, ListItemButton, ListItemText, Typography } from "@mui/material"
+import { Box, Collapse, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material"
 import { useState } from "react"
-import type { Match, DetectorDetails, Finding, Summary, ScanResponse } from "../types"
+//import type { Match, DetectorDetails, Finding, Summary, ScanResponse } from "../types"
+import type { DetectorDetails, Finding, Match, ScanResponse } from "../types"
 
-export const DisplayResponse = ({ data }: { data: ScanResponse }) => {
+export const DisplayFindings = ({ data }: { data: ScanResponse }) => {
     return (
-        <Box sx={{ width: '80%' }}>
+        <Stack sx={{ width: '80%', pl: 2 }}>
             <Box>
                 <Typography variant='h4'>
                     LLM analysis
@@ -12,31 +13,50 @@ export const DisplayResponse = ({ data }: { data: ScanResponse }) => {
                 <Typography variant='h6'>
                     {data.llm_analysis.message || data.llm_analysis.error}
                 </Typography>
-                <Typography variant='h5'>
+                <Typography variant='h4'>
                     Summary
                 </Typography>
-                <Box>
-                    {
-                        (Object.entries(data.summary) as [keyof Summary, number][]).map(([key, value]) => (
-                            <Typography>{key}: {value}</Typography>
-
-                        ))
-                    }
+                <Box sx={{ pl: 4 }}>
+                    <Typography>Files with errors: {data.summary.files_with_errors}</Typography>
+                    <Typography>Files with secrets: {data.summary.files_with_secrets}</Typography>
+                    <Typography>Total files scanned: {data.summary.total_files_scanned}</Typography>
                 </Box>
             </Box>
-            <List>
+            <List component='div' disablePadding sx={{ width: { xs: '100%', sm: '80%', md: '60%' } }}>
                 {
                     data.findings.map((finding: Finding, index: number) => (
                         <ResultRow key={index} finding={finding}></ResultRow>
                     ))
-
                 }
             </List>
-            <Box sx={{ height: '20vh' }}></Box>
-        </Box>
+        </Stack>
     )
 }
 
+export const DisplayAll = ({ data }: { data: ScanResponse }) => {
+    const [open, setOpen] = useState(false)
+
+    const handleClick = () => (
+        setOpen(!open)
+    )
+
+    return (
+        <Box sx={{ width: '80%' }}>
+            <ListItemButton onClick={handleClick}>
+                <Typography variant='h4' >All results</Typography>
+            </ListItemButton>
+            <Collapse in={open} timeout='auto' unmountOnExit>
+                <List component='div' disablePadding sx={{ width: { xs: '100%', sm: '80%', md: '60%' } }}>
+                    {
+                        data.all_results.map((finding: Finding, index: number) => (
+                            <ResultRow key={index} finding={finding}></ResultRow>
+                        ))
+                    }
+                </List>
+            </Collapse>
+        </Box>
+    )
+}
 
 const ResultRow = ({ finding }: { finding: Finding }) => {
     const [open, setOpen] = useState(false)
@@ -49,11 +69,15 @@ const ResultRow = ({ finding }: { finding: Finding }) => {
 
     return (
         <>
-            <ListItemButton onClick={handleClick} divider>
+            <ListItemButton onClick={handleClick}>
                 <ListItemText
                     primary={finding.filename.split('/').pop()}
-                    secondary={finding.filename}></ListItemText
+                    secondary={finding.filename}
+                    sx={{
+                        '& .MuiListItemText-primary': { color: finding.has_secrets ? 'error.main' : 'success.main' }
+                    }}
                 >
+                </ListItemText>
             </ListItemButton>
             <Collapse in={open} timeout='auto' unmountOnExit>
                 <List component='div' disablePadding sx={{ pl: 4 }}>

@@ -12,9 +12,10 @@ export interface DetectorDetails {
 }
 
 export interface Finding {
-    detectors: Record<string, DetectorDetails>;
     filename: string;
-    has_secrets: boolean;
+    detectors?: Record<string, DetectorDetails>;
+    has_secrets?: boolean;
+    error?: string;
 }
 
 export interface LlmAnalysis {

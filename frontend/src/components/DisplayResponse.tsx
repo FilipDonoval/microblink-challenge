@@ -1,22 +1,33 @@
 import { Box, Collapse, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material"
 import { useState } from "react"
-//import type { Match, DetectorDetails, Finding, Summary, ScanResponse } from "../types"
 import type { DetectorDetails, Finding, Match, ScanResponse } from "../types"
 
 export const DisplayFindings = ({ data }: { data: ScanResponse }) => {
     return (
         <Stack sx={{ width: '80%', pl: 2 }}>
             <Box>
+                {
+                    data.summary.files_with_secrets > 0 &&
+                    <Typography variant='h4' gutterBottom sx={{ color: 'error.main', fontWeight: 'bold', textAlign: 'center' }}>
+                        SECRETS FOUND
+                    </Typography>
+                }
                 <Typography variant='h4'>
                     LLM analysis
                 </Typography>
-                <Typography variant='h6'>
-                    {data.llm_analysis.message || data.llm_analysis.error}
+                <Typography variant='h6' sx={{ pl: 2, width: { xs: '100%', sm: '80%', md: '60%' } }}>
+                    {
+                        data.llm_analysis.message ?
+                            data.llm_analysis.message
+                            : data.llm_analysis.error ?
+                                `LLM has a problem: ${data.llm_analysis.error}`
+                                : 'No analysis avaliable'
+                    }
                 </Typography>
                 <Typography variant='h4'>
                     Summary
                 </Typography>
-                <Box sx={{ pl: 4 }}>
+                <Box sx={{ pl: 2 }}>
                     <Typography>Files with errors: {data.summary.files_with_errors}</Typography>
                     <Typography>Files with secrets: {data.summary.files_with_secrets}</Typography>
                     <Typography>Total files scanned: {data.summary.total_files_scanned}</Typography>
@@ -46,7 +57,7 @@ export const DisplayAll = ({ data }: { data: ScanResponse }) => {
                 <Typography variant='h4' >All results</Typography>
             </ListItemButton>
             <Collapse in={open} timeout='auto' unmountOnExit>
-                <List component='div' disablePadding sx={{ width: { xs: '100%', sm: '80%', md: '60%' } }}>
+                <List component='div' disablePadding sx={{ pl: 2, width: { xs: '100%', sm: '80%', md: '60%' } }}>
                     {
                         data.all_results.map((finding: Finding, index: number) => (
                             <ResultRow key={index} finding={finding}></ResultRow>
@@ -65,7 +76,22 @@ const ResultRow = ({ finding }: { finding: Finding }) => {
         setOpen(!open)
     )
 
-    const detectorEntries = Object.entries(finding.detectors)
+    if (finding.error) {
+        return (
+            <ListItem>
+                <ListItemText
+                    primary={finding.filename.split('/').pop()}
+                    secondary={`ERROR: ${finding.error}`}
+                    sx={{
+                        '& .MuiListItemText-primary': { color: 'warning.main' }
+                    }}
+                >
+                </ListItemText>
+            </ListItem>
+        )
+    }
+
+    const detectorEntries = Object.entries(finding.detectors || {})
 
     return (
         <>
@@ -80,7 +106,7 @@ const ResultRow = ({ finding }: { finding: Finding }) => {
                 </ListItemText>
             </ListItemButton>
             <Collapse in={open} timeout='auto' unmountOnExit>
-                <List component='div' disablePadding sx={{ pl: 4 }}>
+                <List component='div' disablePadding sx={{ pl: 2 }}>
                     {
                         detectorEntries.map(([detectorName, details]) => (
                             <DetectorMatchesList key={detectorName} detectorName={detectorName} details={details}></DetectorMatchesList>
@@ -99,12 +125,12 @@ const DetectorMatchesList = ({ detectorName, details }: { detectorName: string, 
         setOpen(!open)
     )
 
-    const isError = details.matches_count > 0
-    const statusColor = isError ? 'error.main' : 'success.main'
+    const foundMatch = details.matches_count > 0
+    const statusColor = foundMatch ? 'error.main' : 'success.main'
 
     return (
 
-        isError ?
+        foundMatch ?
             <>
                 <ListItemButton onClick={handleClick} sx={{ color: 'error' }}>
                     <ListItemText

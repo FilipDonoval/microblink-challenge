@@ -16,8 +16,7 @@ export const DisplayError = ({ error }: { error: ErrorState | null }) => {
         }
     }, [error])
 
-    const handleClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
-        console.log(event)
+    const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
             return
         }

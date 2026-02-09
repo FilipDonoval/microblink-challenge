@@ -1,9 +1,9 @@
 import { Box, Button, Container, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
+import { DisplayResponse } from './components/display/DisplayResponse'
 import { DisplayError } from './components/DisplayError'
-import { DisplayAll, DisplayFindings } from './components/DisplayResponse'
-import { RepoTypeSelector } from './components/RepoTypeSelector'
 import { useRepoScanner } from './hooks/useRepoScanner'
+import { RepoTypeSelector } from './components/selector/RepoTypeSelector'
 
 function App() {
     const [inputUrl, setInputUrl] = useState("")
@@ -25,6 +25,7 @@ function App() {
 
     return (
         <Container sx={{ height: '100vh', pt: 10 }}>
+
             <Stack spacing={4} alignItems='center' justifyContent='center'>
                 <Typography variant='h2' sx={{ textAlign: 'center' }}>Secrets Scanner</Typography>
                 <Typography variant='h5' sx={{ textAlign: 'center' }}>Enter the url of github repo you want to scan</Typography>
@@ -56,22 +57,12 @@ function App() {
                     </Button>
                 </Box>
 
-                {
-                    data &&
-                    <DisplayFindings data={data} ></DisplayFindings>
-                }
-                <DisplayError error={responseError}></DisplayError>
-                {//<Typography>{responseError}</Typography>}
-                }
-
-
-
                 {data &&
-                    <>
-                        <DisplayAll data={data} ></DisplayAll>
-                        <Box sx={{ height: '20vh' }}></Box>
-                    </>
+                    <DisplayResponse data={data}></DisplayResponse>
                 }
+
+                <DisplayError error={responseError}></DisplayError>
+
 
             </Stack>
         </Container>

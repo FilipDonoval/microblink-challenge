@@ -1,4 +1,3 @@
-
 export interface Match {
     entropy: number;
     length: number;
@@ -36,4 +35,3 @@ export interface ScanResponse {
     repo_url: string;
     summary: Summary;
 }
-

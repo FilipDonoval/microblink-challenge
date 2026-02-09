@@ -1,5 +1,6 @@
 import { Box, Button, Container, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
+import { DisplayError } from './components/DisplayError'
 import { DisplayAll, DisplayFindings } from './components/DisplayResponse'
 import { RepoTypeSelector } from './components/RepoTypeSelector'
 import { useRepoScanner } from './hooks/useRepoScanner'
@@ -11,6 +12,7 @@ function App() {
 
     const { data, responseError, isLoading, scan } = useRepoScanner();
 
+
     const handleSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault()
         await scan(inputUrl, privateRepo ? token : '')
@@ -19,6 +21,7 @@ function App() {
     const handleRepoChange = (value: boolean) => {
         setPrivateRepo(value)
     }
+
 
     return (
         <Container sx={{ height: '100vh', pt: 10 }}>
@@ -53,7 +56,13 @@ function App() {
                     </Button>
                 </Box>
 
-                {data ? <DisplayFindings data={data} ></DisplayFindings> : <Typography>{responseError}</Typography>}
+                {
+                    data &&
+                    <DisplayFindings data={data} ></DisplayFindings>
+                }
+                <DisplayError error={responseError}></DisplayError>
+                {//<Typography>{responseError}</Typography>}
+                }
 
 
 

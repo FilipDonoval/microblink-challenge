@@ -1,38 +1,48 @@
-import { Box, Collapse, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material"
+import { Alert, Box, Card, CardContent, Collapse, List, ListItem, ListItemButton, ListItemText, Stack, Typography } from "@mui/material"
 import { useState } from "react"
 import type { DetectorDetails, Finding, Match, ScanResponse } from "../types"
 
 export const DisplayFindings = ({ data }: { data: ScanResponse }) => {
     return (
-        <Stack sx={{ width: '80%', pl: 2 }}>
-            <Box>
-                {
-                    data.summary.files_with_secrets > 0 &&
-                    <Typography variant='h4' gutterBottom sx={{ color: 'error.main', fontWeight: 'bold', textAlign: 'center' }}>
-                        SECRETS FOUND
+        <Stack sx={{ width: '80%', gap: 2 }}>
+            <Card>
+                <CardContent>
+                    <Typography variant='h4' gutterBottom>
+                        LLM analysis
                     </Typography>
-                }
-                <Typography variant='h4'>
-                    LLM analysis
-                </Typography>
-                <Typography gutterBottom sx={{ pl: 2 }}>
-                    {
-                        data.llm_analysis.message ?
-                            data.llm_analysis.message
-                            : data.llm_analysis.error ?
-                                `LLM has a problem: ${data.llm_analysis.error}`
-                                : 'No analysis avaliable'
-                    }
-                </Typography>
-                <Typography variant='h4'>
-                    Summary
-                </Typography>
-                <Box sx={{ pl: 2 }}>
-                    <Typography>Files with errors: {data.summary.files_with_errors}</Typography>
-                    <Typography>Files with secrets: {data.summary.files_with_secrets}</Typography>
-                    <Typography>Total files scanned: {data.summary.total_files_scanned}</Typography>
-                </Box>
-            </Box>
+
+                    <Typography variant='body2' color='text.secondary'>
+                        {
+                            data.llm_analysis.message ?
+                                data.llm_analysis.message
+                                : data.llm_analysis.error ?
+                                    `LLM has a problem: ${data.llm_analysis.error}`
+                                    : 'No analysis avaliable'
+                        }
+                    </Typography>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardContent>
+                    <Typography variant='h4' gutterBottom>
+                        Summary
+                    </Typography>
+
+                    <Stack sx={{ gap: 1 }}>
+                        <Alert severity='error'>
+                            Files with errors: {data.summary.files_with_errors}
+                        </Alert>
+                        <Alert severity='warning'>
+                            Files with secrets: {data.summary.files_with_secrets}
+                        </Alert>
+                        <Alert severity='success'>
+                            Total files scanned: {data.summary.total_files_scanned}
+                        </Alert>
+                    </Stack>
+                </CardContent>
+            </Card>
+
             <List component='div' disablePadding sx={{ width: { xs: '100%', sm: '80%', md: '60%' } }}>
                 {
                     data.findings.map((finding: Finding, index: number) => (

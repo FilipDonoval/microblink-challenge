@@ -1,4 +1,4 @@
-import { Box, Button, Container, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Collapse, Container, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import { DisplayResponse } from './components/display/DisplayResponse'
 import { DisplayError } from './components/DisplayError'
@@ -12,7 +12,6 @@ function App() {
 
     const { data, responseError, isLoading, scan } = useRepoScanner();
 
-
     const handleSubmit = async (event: React.ChangeEvent<HTMLFormElement>) => {
         event.preventDefault()
         await scan(inputUrl, privateRepo ? token : '')
@@ -21,7 +20,6 @@ function App() {
     const handleRepoChange = (value: boolean) => {
         setPrivateRepo(value)
     }
-
 
     return (
         <Container sx={{ height: '100vh', pt: 10 }}>
@@ -40,17 +38,19 @@ function App() {
                         disabled={isLoading}
                         onChange={(e) => setInputUrl(e.target.value)}
                     ></TextField>
-                    {
-                        privateRepo &&
-                        <TextField
-                            sx={{ width: { xs: '90%', sm: '60%', md: '45%' } }}
-                            label='TOKEN'
-                            variant='outlined'
-                            value={token}
-                            disabled={isLoading}
-                            onChange={(e) => setToken(e.target.value)}
-                        ></TextField>
-                    }
+                    <Collapse in={privateRepo} sx={{ width: '100%' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                            <TextField
+                                sx={{ width: { xs: '90%', sm: '60%', md: '45%' }, my: 1 }}
+                                label='TOKEN'
+                                variant='outlined'
+                                value={token}
+                                disabled={isLoading}
+                                onChange={(e) => setToken(e.target.value)}
+                            ></TextField>
+                        </Box>
+                    </Collapse>
+
 
                     <Button variant='contained' type="submit" loading={isLoading} disabled={!inputUrl || (privateRepo && !token)}>
                         Submit

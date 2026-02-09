@@ -13,7 +13,7 @@ services:
     ports:
       - "8002:8002"
     environment:
-      - GEMENI_API_KEY=AIzaSyAsw_8hbXA1rfEvTtgWU7yDqtreTt4-b7Y
+      - GEMENI_API_KEY=
     networks:
       - secrets-net
 
